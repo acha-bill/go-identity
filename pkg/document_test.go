@@ -8,6 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestDocumentHash_ToBase64(t *testing.T) {
+	var docHash DocumentHash
+	b64 := docHash.ToBase64()
+	_, err := base64.StdEncoding.DecodeString(b64)
+	assert.NoError(t, err)
+}
+
 func TestDocumentHashFromBase64(t *testing.T) {
 	t.Run("fails on invalid base64", func(t *testing.T) {
 		s := "invalid"

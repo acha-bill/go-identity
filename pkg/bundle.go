@@ -8,8 +8,8 @@ import (
 
 // Bundle is bundle of a document hash and identity.
 type Bundle struct {
-	DocumentHash DocumentHash
-	Identity     *domain.Identity
+	DocumentHash DocumentHash     `json:"documentHash,string"`
+	Identity     *domain.Identity `json:"identity"`
 }
 
 // Bytes encodes the bundle and returns its bytes.

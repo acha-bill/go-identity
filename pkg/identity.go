@@ -3,8 +3,11 @@ package pkg
 import (
 	"crypto/ecdsa"
 	"crypto/rand"
+	"crypto/sha512"
 	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
+	"errors"
 	"go-identity/domain"
 	"go-identity/store"
 	"go-identity/utils"
@@ -13,12 +16,12 @@ import (
 type (
 	// Identity is the identity service.
 	Identity struct {
-		s *store.Identity
+		s store.Store
 	}
 
 	SignedIdentity struct {
-		Bundle    `json:"bundle"`
-		Signature []byte `json:"signature"`
+		Bundle
+		Signature []byte
 	}
 )
 
@@ -29,7 +32,7 @@ func (s *SignedIdentity) ToJSON() string {
 }
 
 // NewIdentity returns a new identity service.
-func NewIdentity(s *store.Identity) *Identity {
+func NewIdentity(s store.Store) *Identity {
 	return &Identity{s}
 }
 
@@ -50,18 +53,26 @@ func (i *Identity) bundle(docHash DocumentHash, id *domain.Identity) Bundle {
 
 // sign returns the signed bundle.
 func (i *Identity) sign(bundle Bundle) (*SignedIdentity, error) {
-	d, err := bundle.Bytes()
+	msg, err := bundle.Bytes()
 	if err != nil {
 		return nil, err
 	}
 
-	privateKeyStr := utils.GetEnv("PRIVATE_KEY", "secret")
-	privateKey, err := x509.ParseECPrivateKey([]byte(privateKeyStr))
+	// hash before signing.
+	d := sha512.Sum512(msg)
+
+	pemString := utils.GetEnv("PRIVATE_KEY")
+	block, _ := pem.Decode([]byte(pemString))
+	if block == nil {
+		return nil, errors.New("invalid signature block")
+	}
+
+	privateKey, err := x509.ParseECPrivateKey(block.Bytes)
 	if err != nil {
 		return nil, err
 	}
 
-	signature, err := ecdsa.SignASN1(rand.Reader, privateKey, d)
+	signature, err := ecdsa.SignASN1(rand.Reader, privateKey, d[:])
 	signedIdentity := SignedIdentity{
 		Bundle:    bundle,
 		Signature: signature,
