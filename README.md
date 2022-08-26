@@ -79,6 +79,7 @@ func NewIdentity(log *log.Logger, router *mux.Router, svc *pkg.Identity) *Identi
 More:
 - The handler accepts and returns `application/json`
 - It also uses `POST` http method. We used `POST` intead of `GET` to bypass the hassle of url escaping/unescaping the base64 document hash that will be passed to it.
+- The current user ID is passed as a request header as `userID`.
 
 ### Document Hash
 This represents the hash of a document. 
@@ -94,6 +95,7 @@ This represents the identity of a user
 ```go
 // Identity is a user identity.
 type Identity struct {
+	ID        int       `json:"id"`
 	FirstName string    `json:"firstName"`
 	LastName  string    `json:"lastName"`
 	DOB       time.Time `json:"dob,string"`
@@ -115,7 +117,7 @@ The identity store implements the `Store` interface so that it can be mocked.
 ```go
 // Store is a store interface.
 type Store interface {
-	Get() *domain.Identity
+    Get(ID int) (*domain.Identity, error)
 }
 ```
 For example,
@@ -126,9 +128,9 @@ type MockIdentityStore struct {
 }
 
 // Get returns an identity from the store.
-func (s *MockIdentityStore) Get() *domain.Identity {
-	args := s.Called()
-	return args.Get(0).(*domain.Identity)
+func (s *MockIdentityStore) Get(int) (*domain.Identity, error) {
+    args := s.Called()
+    return args.Get(0).(*domain.Identity), args.Error(1)
 }
 ```
 ### Identity (service)
@@ -149,6 +151,20 @@ func NewIdentity(s store.Store) *Identity {
 The server runs on `PORT` and shuts down gracefully in a timeout of `SHUTDOWN_TIMEOUT`  
 `main` is used to tie dependencies together and set up the system structure.
 
+```text
+d := map[int]*domain.Identity{
+    1: {
+        FirstName: "John",
+        LastName:  "Doe",
+        DOB:       time.Now(),
+    }
+}
+identityStore := store.NewIdentity(d)
+identitySvc := pkg.NewIdentity(identityStore)
+identityHandler := handler.NewIdentity(logger, r, identitySvc)
+identityHandler.RegisterRoutes()
+```
+
 ## Running the app
 
 Make sure your envs are up-to-date
@@ -157,17 +173,28 @@ Make sure your envs are up-to-date
 - `SHUTDOWN_TIMEOUT`: Timeout to shut down server gracefully. Default is `5s`
 - `PRIVATE_KEY`: Key to sign bundles. Default is `""`. It is required!
 
+Export private key and run the app.
+
+```text
+$> export PRIVATE_KEY="-----BEGIN EC PRIVATE KEY----- 
+MHcCAQEEIOcbMrmiICy5RRhoIMO1YLTeIs1bam6PYiSIj6toWr/BoAoGCCqGSM49
+AwEHoUQDQgAEE/Y70HTol2aDwsFJZJpVsv0nlKSNbrndmAeC2hlFZYWFtZV8Gmhu
+BB8kxroPtMsB4oXce+xmdaJEImnigSGa3g==
+-----END EC PRIVATE KEY-----"
+
+$> go run main.go
+```
 ## Testing
 
 Run tests with `go test ./...`  
 If you want to run with coverage, do `go test -cover ./...`
 
 ```text
-?       go-identity     [no test files]
+?       go-identity             [no test files]
 ?       go-identity/domain      [no test files]
-ok      go-identity/handler     coverage: 79.5% of statements
+ok      go-identity/handler     0.855s  coverage: 82.2% of statements
 ?       go-identity/middleware  [no test files]
-ok      go-identity/pkg         coverage: 85.2% of statements
-ok      go-identity/store       coverage: 75.0% of statements
+ok      go-identity/pkg 1.114s  coverage: 83.6% of statements
+ok      go-identity/store       0.599s  coverage: 100.0% of statements
 ?       go-identity/utils       [no test files]
 ```
