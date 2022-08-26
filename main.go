@@ -64,6 +64,11 @@ func registerHandlers(logger *log.Logger, r *mux.Router) {
 			LastName:  "Doe",
 			DOB:       time.Now(),
 		},
+		2: {
+			FirstName: "Mary",
+			LastName:  "Doe",
+			DOB:       time.Now(),
+		},
 	}
 	identityStore := store.NewIdentity(d)
 	identitySvc := pkg.NewIdentity(identityStore)

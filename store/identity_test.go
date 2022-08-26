@@ -20,7 +20,12 @@ func TestIdentity_Get(t *testing.T) {
 		},
 	}
 	iStore := NewIdentity(d)
-	id := iStore.Get()
+	id, err := iStore.Get(1)
+	require.NoError(t, err)
 	require.NotNil(t, id)
 	assert.Equal(t, "John", id.FirstName)
+
+	id, err = iStore.Get(2)
+	require.Error(t, err)
+	assert.ErrorIs(t, err, ErrIdentityNotFound)
 }

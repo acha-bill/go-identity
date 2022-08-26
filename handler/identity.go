@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -78,11 +79,19 @@ func (i *Identity) getIdentity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	signedIdentity, err := i.svc.GetIdentity(documentHash)
+	userID, err := strconv.Atoi(r.Header.Get("userID"))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		errResponse := ErrResponse{Message: fmt.Sprintf("invalid userID in header: %s", err.Error())}
+		io.WriteString(w, errResponse.ToJSON())
+		return
+	}
+
+	signedIdentity, err := i.svc.GetIdentity(documentHash, userID)
 	if err != nil {
 		i.log.Printf("failed to get signed identity: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		errResponse := ErrResponse{Message: err.Error()}
+		errResponse := ErrResponse{Message: fmt.Sprintf("failed to get signed identity: %s", err.Error())}
 		io.WriteString(w, errResponse.ToJSON())
 		return
 	}

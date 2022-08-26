@@ -7,7 +7,6 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"encoding/pem"
-	"log"
 	"os"
 )
 
@@ -34,7 +33,5 @@ func GenerateTestPrivateKey() (*ecdsa.PrivateKey, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	log.Println(key)
 	return privateKey, nil
 }

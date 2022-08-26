@@ -37,8 +37,11 @@ func NewIdentity(s store.Store) *Identity {
 }
 
 // GetIdentity returns an identity from the identity store.
-func (i *Identity) GetIdentity(docHash DocumentHash) (*SignedIdentity, error) {
-	id := i.s.Get()
+func (i *Identity) GetIdentity(docHash DocumentHash, userID int) (*SignedIdentity, error) {
+	id, err := i.s.Get(userID)
+	if err != nil {
+		return nil, err
+	}
 	bundle := i.bundle(docHash, id)
 	return i.sign(bundle)
 }

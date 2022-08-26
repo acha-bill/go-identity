@@ -19,9 +19,9 @@ type MockIdentityStore struct {
 }
 
 // Get returns an identity from the store.
-func (s *MockIdentityStore) Get() *domain.Identity {
+func (s *MockIdentityStore) Get(int) (*domain.Identity, error) {
 	args := s.Called()
-	return args.Get(0).(*domain.Identity)
+	return args.Get(0).(*domain.Identity), args.Error(1)
 }
 
 func TestNewIdentity(t *testing.T) {
@@ -55,9 +55,9 @@ func TestIdentity_GetIdentity(t *testing.T) {
 	require.NoError(t, err)
 
 	i := &domain.Identity{FirstName: "John"}
-	s.On("Get").Return(i)
+	s.On("Get").Return(i, nil)
 	var docHash DocumentHash
-	signedIdentity, err := svc.GetIdentity(docHash)
+	signedIdentity, err := svc.GetIdentity(docHash, 1)
 	require.NoError(t, err)
 	assert.Equal(t, "John", signedIdentity.Identity.FirstName)
 	assert.Greater(t, len(signedIdentity.Signature), 1)
