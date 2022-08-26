@@ -1,0 +1,94 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "identity demo",
+        "title": "go-identity demo",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "basePath": "/",
+    "paths": {
+        "/identity": {
+            "post": {
+                "description": "Signs a document bundle for the current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "GetIdentity",
+                "parameters": [
+                    {
+                        "description": "req",
+                        "name": "doc",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.GetIdentityReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.GetIdentityRes"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "domain.Identity": {
+            "type": "object",
+            "properties": {
+                "dob": {
+                    "type": "string",
+                    "example": ""
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastName": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.GetIdentityReq": {
+            "type": "object",
+            "properties": {
+                "documentHash": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.GetIdentityRes": {
+            "type": "object",
+            "properties": {
+                "documentHash": {
+                    "type": "string"
+                },
+                "identity": {
+                    "$ref": "#/definitions/domain.Identity"
+                },
+                "signature": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

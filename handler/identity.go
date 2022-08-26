@@ -52,6 +52,13 @@ func (i *Identity) RegisterRoutes() {
 	i.router.HandleFunc("/identity", i.getIdentity).Methods(http.MethodPost)
 }
 
+// @Summary      GetIdentity
+// @Description  Signs a document bundle for the current user
+// @Accept       json
+// @Produce      json
+// @Param        doc body GetIdentityReq true "req"
+// @Success      200  {object}  GetIdentityRes
+// @Router       /identity [post]
 func (i *Identity) getIdentity(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var req GetIdentityReq

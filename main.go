@@ -15,16 +15,28 @@ import (
 	"os/signal"
 	"time"
 
+	_ "go-identity/docs"
+
 	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
+// @title go-identity demo
+// @version 1.0
+// @description identity demo
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @BasePath /
 func main() {
 	router := mux.NewRouter()
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
-
-	// setup routing and middlewares.
-	registerHandlers(logger, router)
-	registerMiddlewares(logger, router)
 
 	// parse env vars.
 	port := utils.GetEnv("PORT", "8000")
@@ -32,6 +44,13 @@ func main() {
 	if err != nil {
 		logger.Fatal(err)
 	}
+
+	// setup routing and middlewares.
+	registerHandlers(logger, router)
+	registerMiddlewares(logger, router)
+
+	// register docs
+	router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
 
 	// create and start server.
 	server := &http.Server{

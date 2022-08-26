@@ -1,0 +1,62 @@
+basePath: /
+definitions:
+  domain.Identity:
+    properties:
+      dob:
+        example: ""
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      lastName:
+        type: string
+    type: object
+  handler.GetIdentityReq:
+    properties:
+      documentHash:
+        type: string
+    type: object
+  handler.GetIdentityRes:
+    properties:
+      documentHash:
+        type: string
+      identity:
+        $ref: '#/definitions/domain.Identity'
+      signature:
+        type: string
+    type: object
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: identity demo
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: go-identity demo
+  version: "1.0"
+paths:
+  /identity:
+    post:
+      consumes:
+      - application/json
+      description: Signs a document bundle for the current user
+      parameters:
+      - description: req
+        in: body
+        name: doc
+        required: true
+        schema:
+          $ref: '#/definitions/handler.GetIdentityReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.GetIdentityRes'
+      summary: GetIdentity
+swagger: "2.0"
